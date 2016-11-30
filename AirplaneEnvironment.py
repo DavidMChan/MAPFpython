@@ -6,6 +6,7 @@ When we set up the environment, the X axis runs from -inf to inf
 from West to East. The Y axis runs from inf to -inf from North
 to South. The Z-Axis is the height of the aircraft. Heading is
 given in 8 divisions. Distances are euclidean in time.
+#TODO Update the heading table to reflect changes in the environment
 
 """
 
