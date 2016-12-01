@@ -27,8 +27,8 @@ def main():
         main_cbs.expand_cbs_node()
 
     # Print the result
-    for agent, path in main_cbs.tree[main_cbs.best_node].paths:
-        print(agent, path)
+    for agent in main_cbs.tree[main_cbs.best_node].paths.keys():
+        print(agent.name, [str(x) for x  in main_cbs.tree[main_cbs.best_node].paths[agent]])
 
 
 

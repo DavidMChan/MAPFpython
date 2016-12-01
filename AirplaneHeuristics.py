@@ -3,6 +3,8 @@ Heuristics and costs for the airplane Environmen
 David Chan - 2016
 """
 
+#TODO Add the perimeter heuristic
+
 import math
 
 class AirStraightLineHeuristic(object):

@@ -39,8 +39,8 @@ def astar(environment, start, goal):
         examined_nodes += 1
         #print("Looking at ", str(current_node[1]), "with cost",
         #      str(current_node[0]), "target", str(goal))
-        if examined_nodes % 1000 == 0:
-            print(current_node[0])
+        #if examined_nodes % 1000 == 0:
+        #    print(current_node[0])
 
         # If equality, return the reconstructed path
         if current_node[1] == goal:
@@ -61,5 +61,4 @@ def astar(environment, start, goal):
                 gscore[node] = new_gscore
                 fscore[node] = gscore[node] + environment.heuristic(node, goal)
                 open_set.put((fscore[node], node))
-    print("Failed to find a path...")
     return None

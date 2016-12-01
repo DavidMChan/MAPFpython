@@ -3,6 +3,9 @@ CBS Python implementation
 David Chan - 2016
 """
 
+#TODO Add CL to the CBS Algorithm
+#TODO Debug this
+
 import copy
 import Queue
 import AStar
@@ -75,6 +78,7 @@ class CBS(object):
 
         (conflict_l1, conflict_a1, conflict_l2, conflict_a2) = self.environment.find_conflict(
             self.tree[self.best_node].paths)
+
         if conflict_a1 is None and conflict_a2 is None:
             self.plan_finished = True
             return

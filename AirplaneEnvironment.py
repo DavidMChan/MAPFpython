@@ -16,6 +16,7 @@ from itertools import combinations
 
 from AirplaneStates import Heading
 from AirplaneStates import AirplaneAction
+from AirplaneStates import AirplaneConflict
 from AirplaneHeuristics import AirStraightLineHeuristic
 from AirplaneHeuristics import AirSimpleGCost
 from Util import Util
@@ -57,8 +58,8 @@ class AirplaneEnvironment(object):
             new_state = copy.copy(state)
 
             # First update the location using the previous heading
-            new_state.y_loc += Heading.heading_location_table[state.heading % 8][0]
-            new_state.x_loc += Heading.heading_location_table[state.heading % 8][1]
+            new_state.y_loc += Heading.heading_location_table[state.heading % 8][1]
+            new_state.x_loc += Heading.heading_location_table[state.heading % 8][0]
 
             # Then update the height, heading, and speed
             new_state.z_loc += action.delta_height
@@ -99,19 +100,27 @@ class AirplaneEnvironment(object):
                 s2 = path2_p[min(path2_idx, len(path2_p)-1)]
                 s2_e = path2_p[min(path2_idx+1, len(path2_p)-1)]
 
-                if Util.get_overlap((s1.time, s1_e.time),(s2.time,s2_e.time)) != 0:
-                    if Util.get_overlap((s1.x_loc, s1_e.x_loc),(s2.x_loc, s2_e.x_loc)) != 0:
-                        if Util.get_overlap((s1.y_loc, s1_e.y_loc),(s2.y_loc, s2_e.y_loc)) != 0:
-                            if Util.get_overlap((s1.z_loc, s1_e.z_loc),(s2.z_loc, s2_e.z_loc)) != 0:
+                if Util.get_overlap((s1.time, s1_e.time), (s2.time, s2_e.time)) != 0:
+                    if Util.get_overlap((s1.x_loc, s1_e.x_loc), (s2.x_loc, s2_e.x_loc)) != 0:
+                        if Util.get_overlap((s1.y_loc, s1_e.y_loc), (s2.y_loc, s2_e.y_loc)) != 0:
+                            if Util.get_overlap((s1.z_loc, s1_e.z_loc), (s2.z_loc, s2_e.z_loc)) != 0:
                                 # We have a conflict here.
-                                pass
+                                # For agent 1
+                                conflict_1 = AirplaneConflict((s1.x_loc, s1_e.x_loc),
+                                                              (s1.y_loc, s1_e.y_loc),
+                                                              (s1.z_loc, s1_e.z_loc),
+                                                              (s1.time, s1_e.time))
+                                conflict_2 = AirplaneConflict((s2.x_loc, s2_e.x_loc),
+                                                              (s2.y_loc, s2_e.y_loc),
+                                                              (s2.z_loc, s2_e.z_loc),
+                                                              (s2.time, s2_e.time))
+                                return (path1, conflict_1, path2, conflict_2)
 
-                if (s1_e.time < s2_e.time):
+                if s1_e.time < s2_e.time and path1_idx < len(path1_p):
                     path1_idx += 1
-                else:
+                elif path2_idx < len(path2_p):
                     path2_idx += 1
+                else:
+                    path1_idx += 1
 
-
-        return (1, 2, 3, 4)
-
-    #TODO Implement CBS+CL
+        return (None,None,None,None)
