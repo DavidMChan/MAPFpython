@@ -32,6 +32,7 @@ def astar(environment, start, goal):
 
     print("Planning from", str(start), "to", str(goal))
     examined_nodes = 0
+    generated_nodes = 1
 
     while not open_set.empty():
         # Get the open node
@@ -44,7 +45,7 @@ def astar(environment, start, goal):
 
         # If equality, return the reconstructed path
         if current_node[1] == goal:
-            print("Expanded Nodes:", examined_nodes)
+            print("Expanded Nodes:", examined_nodes, "Generated Nodes:", generated_nodes)
             return reconstruct_path(came_from, start, current_node[1])
 
         if current_node[1] in closed_set:
@@ -52,6 +53,7 @@ def astar(environment, start, goal):
         closed_set.append(current_node[1])
 
         for node in environment.get_neighbors(current_node[1]):
+            generated_nodes += 1
             if node in closed_set:
                 continue
 
