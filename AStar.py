@@ -13,7 +13,7 @@ def reconstruct_path(trace, start, goal):
     else:
         return reconstruct_path(trace, start, trace[goal]) + [goal]
 
-def astar(environment, start, goal):
+def astar(environment, start, goal, conflicts=None):
     """ Perform A* Search on an environment from a start to a goal """
     # Set the closed set to null
     closed_set = []
@@ -52,7 +52,7 @@ def astar(environment, start, goal):
             continue
         closed_set.append(current_node[1])
 
-        for node in environment.get_neighbors(current_node[1]):
+        for node in environment.get_neighbors(current_node[1], conflicts):
             generated_nodes += 1
             if node in closed_set:
                 continue

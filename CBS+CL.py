@@ -1,5 +1,5 @@
 """
-CBS Python implementation
+CBS+CL Python implementation
 David Chan - 2016
 """
 
@@ -7,8 +7,7 @@ import copy
 import Queue
 import AStar
 
-
-class CBSNode(object):
+class CBSCLNode(object):
     """ Node which is a part of the CBS tree """
     def __init__(self):
         self.conflict = None
@@ -16,15 +15,30 @@ class CBSNode(object):
         self.parent = None
         self.paths = {}
 
-class CBS(object):
-    """ Class containing CBS methods for an environment """
-    def __init__(self, environment):
-        self.agents = []
-        self.open_list = Queue.PriorityQueue()
+class EnvironmentContainer(object):
+    """ Class containing environments """
+    def __init__(self, environment, conflicts):
         self.environment = environment
+        self.conflicts = conflicts
+
+    def __eq__(self, other):
+        return self.conflicts == other.conflicts
+    def __ne__(self, other):
+        return not self == other
+    def __lt__(self, other):
+        return self.conflicts < other.conflicts
+    def __gt__(self, other):
+        return self.conflicts > other.conflicts
+
+class CBSCL(object):
+    """ Class containing CBS methods for an environment """
+    def __init__(self, environments):
+        self.agents = {}
+        self.open_list = Queue.PriorityQueue()
+        self.environments = environments.sort()
         self.tree = {}
         self.plan_finished = True
-        root = CBSNode()
+        root = CBSCLNode()
         root.parent = 0
         self.tree[0] = root
         self.best_node = 0
@@ -32,8 +46,8 @@ class CBS(object):
 
     def add_agent(self, agent):
         """ Add an agent to the CBS structure """
-        self.agents.append(agent)
-        agent_optimal = AStar.astar(self.environment, agent.start, agent.goal)
+        self.agents[agent] = 0
+        agent_optimal = AStar.astar(self.environments[0], agent.start, agent.goal)
         self.tree[0].paths[agent] = agent_optimal
         print("Added agent", len(self.agents), "with path from",
               str(agent.start), "to", str(agent.goal))
@@ -60,17 +74,21 @@ class CBS(object):
             temp_location = self.tree[temp_location].parent
 
         # Plan the agent
-        path = AStar.astar(self.environment, agent_to_replan.start, agent_to_replan.goal, conflicts)
+        path = AStar.astar(self.environments[self.agents[agent_to_replan]], agent_to_replan.start,
+                           agent_to_replan.goal, conflicts)
+        if path is None:
+            return False
 
         # Add the path to the tree
         self.tree[node].paths[agent_to_replan] = path
+        return True
 
     def expand_cbs_node(self):
-        """ Expand a single CBS node if necessary """
+        """ Expand a single CBS+CL node if necessary """
         if self.plan_finished:
             return
 
-        (conflict_l1, conflict_a1, conflict_l2, conflict_a2) = self.environment.find_conflict(
+        (conflict_l1, conflict_a1, conflict_l2, conflict_a2) = self.environments[-1].find_conflict(
             self.tree[self.best_node].paths)
 
         if conflict_a1 is None and conflict_a2 is None:
@@ -89,16 +107,27 @@ class CBS(object):
         self.tree[self.last_created + 2].agent = conflict_a2
         self.tree[self.last_created + 2].parent = self.best_node
 
-        self.replan(self.last_created + 1)
-        self.replan(self.last_created + 2)
+        while not self.replan(self.last_created + 1):
+            if self.agents[self.tree[self.last_created + 1].agent] == len(self.environments):
+                print "Path impossible"
+                return
+            else:
+                self.agents[self.tree[self.last_created + 1].agent] += 1
+
+        while not self.replan(self.last_created + 2):
+            if self.agents[self.tree[self.last_created + 2].agent] == len(self.environments):
+                print "Path impossible"
+                return
+            else:
+                self.agents[self.tree[self.last_created + 2].agent] += 1
 
         #Figure out path costs and add to open list
-        self.open_list.put((sum([self.environment.get_path_cost(x)
-                                 for x in self.tree[self.last_created + 1].paths]),
+        self.open_list.put((sum([self.environments[self.agents[x]].get_path_cost(self.tree[self.last_created + 1].paths[x])
+                                 for x in self.tree[self.last_created + 1].paths.keys()]),
                             self.last_created+1)
                           )
-        self.open_list.put((sum([self.environment.get_path_cost(x)
-                                 for x in self.tree[self.last_created + 2].paths]),
+        self.open_list.put((sum([self.environments[self.agents[x]].get_path_cost(self.tree[self.last_created + 2].paths[x])
+                                 for x in self.tree[self.last_created + 2].paths.keys()]),
                             self.last_created+2)
                           )
 
