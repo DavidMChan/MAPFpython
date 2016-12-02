@@ -4,4 +4,4 @@ The MAPFpython library is designed for rapid research into multi-agent pathfindi
 # Installation
 There are currently no additional requirements to install ***unless*** you wish to use the visualization tools. 
 ### Visualization
-The single requirement is VPython Classic v5, which on linux can be installed using `sudo apt-get install python-visual`. For other platforms refer to http://vpython.org/
+The single requirement is VPython Classic v5, which on ubuntu linux can be installed using `sudo apt-get install python-visual`. For other platforms refer to http://vpython.org/
