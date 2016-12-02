@@ -86,17 +86,20 @@ class CBSCL(object):
 
     def expand_cbs_node(self):
         """ Expand a single CBS+CL node if necessary """
+        # If this is the case, then no expansion is necessary
         if self.plan_finished:
-            return
+            return True
 
+        # Look for a conflict in the best node
         (conflict_l1, conflict_a1, conflict_l2, conflict_a2) = self.environments[-1].find_conflict(
             self.tree[self.best_node].paths)
 
+        # If there are no conflicts, we don't need to keep expanding
         if conflict_a1 is None and conflict_a2 is None:
             self.plan_finished = True
-            return
+            return True
 
-        # Setup the first child node
+        # Otherwise setup the first child node
         self.tree[self.last_created + 1] = copy.deepcopy(self.tree[self.best_node])
         self.tree[self.last_created + 1].conflict = conflict_l1
         self.tree[self.last_created + 1].agent = conflict_a1
@@ -108,34 +111,44 @@ class CBSCL(object):
         self.tree[self.last_created + 2].agent = conflict_a2
         self.tree[self.last_created + 2].parent = self.best_node
 
+        # Promote agents while they have no solutions
+        satisfiable_n1 = True
+        satisfiable_n2 = True
         while not self.replan(self.last_created + 1):
             if self.agents[self.tree[self.last_created + 1].agent] == len(self.environments):
-                print "Path impossible"
-                return
+                satisfiable_n1 = False
+                break
             else:
                 self.agents[self.tree[self.last_created + 1].agent] += 1
 
         while not self.replan(self.last_created + 2):
             if self.agents[self.tree[self.last_created + 2].agent] == len(self.environments):
-                print "Path impossible"
-                return
+                satisfiable_n2 = False
+                break
             else:
                 self.agents[self.tree[self.last_created + 2].agent] += 1
 
         #Figure out path costs and add to open list
-        self.open_list.put((sum([self.environments[self.agents[x]].get_path_cost(self.tree[self.last_created + 1].paths[x])
+        self.open_list.put((sum([self.environments[self.agents[x]].get_path_cost(
+            self.tree[self.last_created + 1].paths[x])
                                  for x in self.tree[self.last_created + 1].paths.keys()]),
-                            self.last_created+1)
+                            self.last_created+1) if satisfiable_n1 else float("inf")
                           )
-        self.open_list.put((sum([self.environments[self.agents[x]].get_path_cost(self.tree[self.last_created + 2].paths[x])
+        self.open_list.put((sum([self.environments[self.agents[x]].get_path_cost(
+            self.tree[self.last_created + 2].paths[x])
                                  for x in self.tree[self.last_created + 2].paths.keys()]),
-                            self.last_created+2)
+                            self.last_created+2) if satisfiable_n2 else float("inf")
                           )
 
         self.last_created += 2
 
         # Update the best node
-        self.best_node = self.open_list.get()[1]
+        temp_node = self.open_list.get()[1]
+        if temp_node[0] == float("inf"):
+            return False
+        else:
+            self.best_node = temp_node[1]
+            return True
 
 
     def get_plan_finished(self):
