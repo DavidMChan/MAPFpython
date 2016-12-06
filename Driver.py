@@ -5,11 +5,14 @@ Driver/Testing class for CBS
 David Chan - 2016
 """
 
-
+import __builtin__
 import argparse
 import random
 
+import Util
+
 from CBSCL import CBSCL
+from Printer import printv
 
 
 
@@ -24,15 +27,15 @@ def parse_args():
                         help="Comma-delim list of environment names. default=AirplaneEnvironment")
     parser.add_argument("-a", "--agent-type", default="AirplaneAgent",
                         help="Agent type name. default=AirplaneAgent")
-    parser.add_argument("-x", "--visual", type=bool, default=False,
-                        help="Use a visual simulation. default=False")
-    parser.add_argument("-v", "--verbose", type=bool, default=False,
-                        help="Print verbose output. default=False")
-    return parser.parse_args()
+    parser.add_argument("-x", "--visual", action='store_true',
+                        help="Display simulation. default=off")
+    parser.add_argument("-v", nargs='?', action=Util.VAction, dest='verbose',
+                        help="Print verbose output. default=off")
+    args = parser.parse_args()
+    if args.verbose is None:
+        args.verbose = 0
+    return args
 
-# Global argument variable 
-#TODO Make this less dangerous for imports
-GLOBAL_ARGS = None
 
 def main():
     """ Main method """
@@ -45,7 +48,7 @@ def main():
 
     # Generate random agents
     #TODO Make this less dangerous
-    agents = eval("[%s.random_agent() for _ in range(0, args.num_agents)]"%GLOBAL_ARGS.agent_type)
+    agents = eval("[%s.random_agent() for _ in range(0, GLOBAL_ARGS.num_agents)]"%GLOBAL_ARGS.agent_type)
 
     env_names = GLOBAL_ARGS.environments.split(",")
 
@@ -67,17 +70,18 @@ def main():
     # Solve the CBS
     while not main_cbs.plan_finished:
         if not main_cbs.expand_cbs_node():
-            print "CBS Not solvable. No open nodes with cost <= inf"
+            printv("CBS Not solvable. No open nodes with cost <= inf")
 
     # Print the result
     for agent in main_cbs.tree[main_cbs.best_node].paths.keys():
-        print(agent.name, [str(x) for x  in main_cbs.tree[main_cbs.best_node].paths[agent]])
+        printv(agent.name, [str(x) for x  in main_cbs.tree[main_cbs.best_node].paths[agent]])
 
 
 
 if __name__ == "__main__":
     # Parse the command line arguments
-    GLOBAL_ARGS = parse_args()
+    __builtin__.GLOBAL_ARGS = parse_args()
+    printv(GLOBAL_ARGS,verbosity=3)
 
     # Run the main function
     main()

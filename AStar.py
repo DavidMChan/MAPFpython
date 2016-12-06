@@ -6,6 +6,9 @@ David Chan - 2016
 import Queue
 from collections import defaultdict
 
+from Printer import printv
+
+
 def reconstruct_path(trace, start, goal):
     """ Reconstruct a path from a search trace """
     if start == goal:
@@ -30,7 +33,7 @@ def astar(environment, start, goal, conflicts=None):
     fscore = defaultdict(lambda: float('inf'))
     fscore[start] = environment.heuristic(start, goal)
 
-    print("Planning from", str(start), "to", str(goal))
+    printv("Planning from", str(start), "to", str(goal),verbosity=1)
     examined_nodes = 0
     generated_nodes = 1
 
@@ -45,7 +48,7 @@ def astar(environment, start, goal, conflicts=None):
 
         # If equality, return the reconstructed path
         if current_node[1] == goal:
-            print("Expanded Nodes:", examined_nodes, "Generated Nodes:", generated_nodes)
+            printv("Expanded Nodes:", examined_nodes, "Generated Nodes:", generated_nodes,verbosity=2)
             return reconstruct_path(came_from, start, current_node[1])
 
         if current_node[1] in closed_set:

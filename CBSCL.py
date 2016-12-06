@@ -7,6 +7,8 @@ import copy
 import Queue
 import AStar
 
+from Printer import printv
+
 class CBSCLNode(object):
     """ Node which is a part of the CBS tree """
     def __init__(self):
@@ -50,8 +52,8 @@ class CBSCL(object):
         self.agents[agent] = 0
         agent_optimal = AStar.astar(self.environments[0], agent.start, agent.goal)
         self.tree[0].paths[agent] = agent_optimal
-        print("Added agent", len(self.agents), "with path from",
-              str(agent.start), "to", str(agent.goal))
+
+        printv("Added agent", len(self.agents), "with path from", str(agent.start), "to", str(agent.goal), verbosity=1)
         self.plan_finished = False
         tree_root = self.tree[0]
         self.tree.clear()
