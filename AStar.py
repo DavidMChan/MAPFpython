@@ -16,13 +16,12 @@ def reconstruct_path(trace, start, goal):
     else:
         return reconstruct_path(trace, start, trace[goal]) + [goal]
 
-def astar(environment, start, goal, conflicts=None):
+def astar(environment, start, goal, conflicts=None, maxDeviation=2.0):
     """ Perform A* Search on an environment from a start to a goal """
     # Set the closed set to null
     closed_set = []
     # Setup the open set and enqueue the start at cost 0
     open_set = Queue.PriorityQueue()
-    open_set.put((0, start))
     # Set up dictionary for recording the paths
     came_from = {}
     # Setup G-Score table
@@ -31,7 +30,8 @@ def astar(environment, start, goal, conflicts=None):
 
     # Setup F-Score table
     fscore = defaultdict(lambda: float('inf'))
-    fscore[start] = environment.heuristic(start, goal)
+    best = fscore[start] = environment.heuristic(start, goal)
+    open_set.put((fscore[start], start))
 
     printv("Planning from", str(start), "to", str(goal),verbosity=1)
     examined_nodes = 0
@@ -65,5 +65,6 @@ def astar(environment, start, goal, conflicts=None):
                 came_from[node] = current_node[1]
                 gscore[node] = new_gscore
                 fscore[node] = gscore[node] + environment.heuristic(node, goal)
-                open_set.put((fscore[node], node))
-    return None
+                if fscore[node] < maxDeviation*best:
+                  open_set.put((fscore[node], node))
+    return [[]]

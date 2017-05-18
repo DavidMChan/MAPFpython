@@ -24,12 +24,12 @@ from Util import Util
 class AirplaneEnvironment(object):
     """ Environment class describing how airplanes work """
 
-    def __init__(self, min_speed=1, max_speed=5, min_height=5, max_height=30, grid_size=3):
-        self.min_speed = min_speed
-        self.max_speed = max_speed
-        self.grid_size = grid_size
-        self.min_height = min_height
-        self.max_height = max_height
+    def __init__(self, params={'min_speed':1, 'max_speed':5, 'min_height':5, 'max_height':30, 'grid_size':3}):
+        self.min_speed = params['min_speed']
+        self.max_speed = params['max_speed']
+        self.grid_size = params['grid_size']
+        self.min_height = params['min_height']
+        self.max_height = params['max_height']
         self.heuristic = AirStraightLineHeuristic()
         self.distance = AirSimpleGCost()
 

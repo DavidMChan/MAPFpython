@@ -82,3 +82,7 @@ class AirplaneConflict(object):
         """ Check if a state conflicts pointwise with a particular state """
         return AirplaneConflict.edge_conflicts_with(self, state, state)
 
+    def conflicts_with(self, state_from, state_to):
+        """ Check for vertex or edge conflicts """
+        return self.point_conflicts_with(state_to) or self.edge_conflicts_with(state_from, state_to)
+

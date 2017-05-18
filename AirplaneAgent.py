@@ -20,11 +20,11 @@ class AirplaneAgent(object):
         return self.name == other.name
 
     @staticmethod
-    def random_agent():
+    def random_agent(env):
         """ Generate a random agent """
-        start_state = AirplaneState(randint(0, 200), randint(0, 200),
-                                    randint(10, 20), 0, randint(0, 7), randint(1, 5))
-        goal_state = AirplaneState(randint(0, 200), randint(0, 200),
-                                   randint(10, 20), 0, randint(0, 7), randint(1, 5))
+        start_state = AirplaneState(randint(0, env.grid_size), randint(0, env.grid_size),
+                                    randint(10, env.max_height), 0, randint(0, 7), randint(env.min_speed, env.max_speed))
+        goal_state = AirplaneState(randint(0, env.grid_size), randint(0, env.grid_size),
+                                   randint(10, env.max_height), 0, randint(0, 7), randint(env.min_speed, env.max_speed))
         name = ''.join(choice(string.ascii_uppercase + string.digits) for _ in range(6))
         return AirplaneAgent(start_state, goal_state, name)
